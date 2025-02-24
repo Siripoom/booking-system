@@ -1,0 +1,75 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String   @id @default(uuid()) @unique
+  fullName    String
+  email       String   @unique
+  password    String
+  role        Role     @default(USER)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  bookings    Booking[]
+}
+
+model Place {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String?
+  createdAt   DateTime @default(now())
+
+  activities  Activity[]
+}
+
+model Activity {
+  id          Int      @id @default(autoincrement())
+  place       Place    @relation(fields: [placeId], references: [id], onDelete: Cascade)
+  placeId     Int
+  name        String
+  maxPeople   Int
+  price       Float
+  createdAt   DateTime @default(now())
+
+  rooms       Room[]
+}
+
+model Room {
+  id          Int      @id @default(autoincrement())
+  activity    Activity @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  activityId  Int
+  name        String
+  createdAt   DateTime @default(now())
+
+  bookings    Booking[]
+}
+
+model Booking {
+  id          Int      @id @default(autoincrement())
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      String
+  room        Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  roomId      Int
+  bookingDate DateTime
+  status      BookingStatus @default(PENDING)
+  createdAt   DateTime @default(now())
+}
+
+enum Role {
+  ADMIN
+  HOST
+  STAFF
+  USER
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELED
+}
