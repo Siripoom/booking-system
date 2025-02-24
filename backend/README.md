@@ -66,7 +66,7 @@ docker ps
 3. Connect to PostgreSQL inside the container:
 
 ```sh
-docker exec -it postgres_db psql -U postgres -d patient_transport
+docker exec -it postgres_db psql -U postgres -d booking-system
 ```
 
 ### **If running PostgreSQL locally**

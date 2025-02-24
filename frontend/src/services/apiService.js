@@ -42,6 +42,7 @@ export const deletePlace = (id) => api.delete(`/places/${id}`);
 export const getActivities = () => api.get("/activities");
 export const getActivityById = (id) => api.get(`/activities/${id}`);
 export const createActivity = (activityData) =>
+  console.log("activityData", activityData) ||
   api.post("/activities", activityData);
 export const updateActivity = (id, activityData) =>
   api.put(`/activities/${id}`, activityData);
@@ -58,9 +59,17 @@ export const deleteRoom = (id) => api.delete(`/rooms/${id}`);
 export const getBookings = () => api.get("/bookings");
 export const getBookingById = (id) => api.get(`/bookings/${id}`);
 export const createBooking = (bookingData) =>
-  api.post("/bookings", bookingData);
+  api.post("/bookings", bookingData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
 export const updateBooking = (id, bookingData) =>
   api.put(`/bookings/${id}`, bookingData);
 export const deleteBooking = (id) => api.delete(`/bookings/${id}`);
+
+// อัพโหลดไฟล์สลิปไปยัง Backend
+export const uploadFile = (formData) =>
+  api.post("/uploads", formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
 
 export default api;

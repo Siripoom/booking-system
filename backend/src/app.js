@@ -23,6 +23,7 @@ app.use("/api/places", placeRoutes);
 app.use("/api/activities", activityRoutes);
 app.use("/api/bookings", bookingRoutes);
 app.use("/api/rooms", roomRoutes);
+app.use("/uploads", express.static("uploads"));
 
 // ทดสอบ API Health Check
 app.get("/", async (req, res) => {
