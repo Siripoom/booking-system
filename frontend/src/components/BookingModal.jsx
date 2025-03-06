@@ -53,6 +53,9 @@ const BookingModal = ({ date, roomId, onClose }) => {
         <p>
           Selected Room: <strong>Room {roomId}</strong>
         </p>
+        <p>
+          Bank Account: <strong>SCB </strong>
+        </p>
 
         {/* อัพโหลดไฟล์ */}
         <label className="block mt-4 font-semibold">Upload Payment Slip:</label>

@@ -149,6 +149,20 @@ const ManageBookings = () => {
               </td>
               <td>{booking.bookingDate.split("T")[0]}</td>
               <td>{booking.status}</td>
+              <td className="border p-2">
+                {booking.paymentSlip ? (
+                  <a
+                    href={`http://localhost:5000${booking.paymentSlip}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-500 underline"
+                  >
+                    View Slip
+                  </a>
+                ) : (
+                  "No Slip"
+                )}
+              </td>
               <td>
                 <button
                   className="btn btn-warning btn-sm mx-1"

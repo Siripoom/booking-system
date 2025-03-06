@@ -7,7 +7,7 @@ const Register = () => {
     fullName: "",
     email: "",
     password: "",
-    citizen_id: "",
+    role: "USER",
   });
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -20,9 +20,10 @@ const Register = () => {
     e.preventDefault();
     setLoading(true);
     try {
+      console.log("formData", formData);
       await registerUser(formData);
       alert("Registration successful!");
-      navigate("/login");
+      navigate("/auth/login");
     } catch (error) {
       alert("Error: " + error.response?.data?.message || "Registration failed");
     } finally {

@@ -1,5 +1,6 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+
 const { PrismaClient } = require("@prisma/client");
 
 const prisma = new PrismaClient();
@@ -7,16 +8,7 @@ const prisma = new PrismaClient();
 // ✅ ลงทะเบียนผู้ใช้
 exports.register = async (req, res) => {
   try {
-    const { fullName, email, password, role, citizen_id } = req.body;
-
-    // ตรวจสอบเลขบัตรประชาชนว่ามีอยู่หรือไม่
-    const existingUser = await prisma.user.findUnique({
-      where: { citizen_id },
-    });
-
-    if (existingUser) {
-      return res.status(400).json({ message: "Citizen ID already exists" });
-    }
+    const { fullName, email, password, role } = req.body;
 
     // เข้ารหัสรหัสผ่าน
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -28,7 +20,6 @@ exports.register = async (req, res) => {
         email,
         password: hashedPassword,
         role: role || "USER",
-        citizen_id,
       },
     });
 
