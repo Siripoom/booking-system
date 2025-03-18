@@ -3,3 +3,8 @@
 * {
   font-family: "Kanit", serif !important;
 }
+
+html,body {
+  margin: 0;
+  padding: 0;
+}

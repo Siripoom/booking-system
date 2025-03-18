@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { registerUser } from "../../services/apiService";
 import { Link, useNavigate } from "react-router-dom";
-
+import bg from '../../assets/bg2.webp'
+import Swal from "sweetalert2";
 const Register = () => {
   const [formData, setFormData] = useState({
     fullName: "",
@@ -22,7 +23,13 @@ const Register = () => {
     try {
       console.log("formData", formData);
       await registerUser(formData);
-      alert("Registration successful!");
+      // alert("Registration successful!");
+      Swal.fire({
+        title: "Registration successful!",
+        icon: "success",
+        showConfirmButton: false,
+        timer: 1500
+      })
       navigate("/auth/login");
     } catch (error) {
       alert("Error: " + error.response?.data?.message || "Registration failed");
@@ -32,8 +39,15 @@ const Register = () => {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <div className="card w-96 bg-white shadow-xl p-6">
+    <div className="flex items-center justify-center min-h-screen bg-gray-100" style={{
+      backgroundImage: `url(${bg})`,
+      backgroundSize: "cover", // ปรับให้เต็มพื้นที่
+      backgroundPosition: "center", // จัดให้อยู่กึ่งกลาง
+      backgroundRepeat: "no-repeat", // ป้องกันการซ้ำของภาพ
+    }}>
+      <div className="card w-96 bg-white shadow-xl p-6" style={{
+        opacity: '0.95'
+      }}>
         <h2 className="text-2xl font-bold text-center">Register</h2>
         <form onSubmit={handleSubmit} className="mt-4">
           <input

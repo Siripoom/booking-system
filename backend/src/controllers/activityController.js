@@ -31,7 +31,7 @@ exports.getActivityById = async (req, res) => {
 // 🔹 สร้างกิจกรรมใหม่
 exports.createActivity = async (req, res) => {
   try {
-    const { placeId, name, maxPeople, price } = req.body;
+    const { placeId, name, maxPeople, price,time } = req.body;
 
     // ตรวจสอบว่าสถานที่มีอยู่จริงหรือไม่
     const placeExists = await prisma.place.findUnique({
@@ -45,6 +45,7 @@ exports.createActivity = async (req, res) => {
         name,
         maxPeople,
         price: parseFloat(price),
+        time
       },
     });
 
@@ -57,7 +58,7 @@ exports.createActivity = async (req, res) => {
 // 🔹 อัปเดตข้อมูลกิจกรรม
 exports.updateActivity = async (req, res) => {
   try {
-    const { placeId, name, maxPeople, price } = req.body;
+    const { placeId, name, maxPeople, price ,time} = req.body;
 
     // ตรวจสอบว่าสถานที่มีอยู่จริงหรือไม่
     if (placeId) {
@@ -75,6 +76,7 @@ exports.updateActivity = async (req, res) => {
         name,
         maxPeople,
         price: price ? parseFloat(price) : undefined,
+        time
       },
     });
 

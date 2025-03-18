@@ -35,9 +35,9 @@ export default function Navbar() {
   };
 
   return (
-    <div className="navbar bg-green-500">
+    <div className="navbar bg-green-900">
       <div className="flex-1">
-        <Link to="/" className="btn btn-ghost text-xl">
+        <Link to="/" className="btn btn-ghost text-4xl" style={{color:"#fff"}}>
           Booking System
         </Link>
       </div>
@@ -46,10 +46,10 @@ export default function Navbar() {
           {username ? (
             <>
               <li>
-                <span className="font-bold">{username}</span>
+                <span className="font-bold" style={{color:"#fff"}}>{username}</span>
               </li>
               <li>
-                <button onClick={handleLogout} className="btn btn-error btn-sm">
+                <button onClick={handleLogout} style={{color:"#fff"}} className="btn btn-error btn-sm">
                   Logout
                 </button>
               </li>
@@ -57,10 +57,10 @@ export default function Navbar() {
           ) : (
             <>
               <li>
-                <Link to="/auth/login">Log-in</Link>
+                <Link to="/auth/login" style={{color:"#fff"}}>Log-in</Link>
               </li>
               <li>
-                <Link to="/auth/register">Register</Link>
+                <Link to="/auth/register" style={{color:"#fff"}}>Register</Link>
               </li>
             </>
           )}

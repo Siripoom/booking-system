@@ -36,7 +36,7 @@ model Activity {
   maxPeople   Int
   price       Float
   createdAt   DateTime @default(now())
-
+  time        String[]
   rooms       Room[]
 }
 
@@ -57,6 +57,7 @@ model Booking {
   room        Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
   roomId      Int
   bookingDate DateTime
+  bookingTime String
   paymentSlip String
   status      BookingStatus @default(PENDING)
   createdAt   DateTime @default(now())

@@ -1,8 +1,9 @@
 import { useState } from "react";
 import PropTypes from "prop-types";
 import { createBooking } from "../services/apiService";
+import Swal from "sweetalert2";
 
-const BookingModal = ({ date, roomId, onClose }) => {
+const BookingModal = ({ date, roomId, onClose , bookingTime}) => {
   const [file, setFile] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
@@ -28,13 +29,20 @@ const BookingModal = ({ date, roomId, onClose }) => {
       formData.append("bookingDate", date.toISOString());
       formData.append("status", "PENDING");
       formData.append("paymentSlip", file);
-
+      formData.append("bookingTime",bookingTime);
       // ส่งข้อมูลไปที่ Backend
       console.log(formData);
       await createBooking(formData);
 
-      alert("Booking successful!");
+      // alert("Booking successful!");
+      Swal.fire({
+        title:"successful",
+        icon:"success",
+        showConfirmButton:false,
+        timer:1500
+      })
       onClose();
+      window.location.reload();
     } catch (error) {
       console.error("Booking failed:", error);
       setErrorMessage("Failed to create booking. Please try again.");

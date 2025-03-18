@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import { getActivities } from "../../services/apiService";
 import { Link } from "react-router-dom";
 import Navbar from "../../components/Navbar/Navbar";
-
+import './Activities.module.css'
+import bg from '../../assets/bg.webp'
 const Activities = () => {
   const [activities, setActivities] = useState([]);
 
@@ -16,7 +17,12 @@ const Activities = () => {
   };
 
   return (
-    <>
+    <div className="h-screen" style={{
+      backgroundImage: `url(${bg})`,
+      backgroundSize: "cover", // ปรับให้เต็มพื้นที่
+      backgroundPosition: "center", // จัดให้อยู่กึ่งกลาง
+      backgroundRepeat: "no-repeat", // ป้องกันการซ้ำของภาพ
+    }}>
       <Navbar />
       <div className="container mx-auto p-6">
         <h2 className="text-2xl font-bold mb-4">Available Activities</h2>
@@ -34,7 +40,7 @@ const Activities = () => {
           ))}
         </div>
       </div>
-    </>
+    </div>
   );
 };
 
