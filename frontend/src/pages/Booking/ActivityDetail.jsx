@@ -9,8 +9,7 @@ import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 import BookingModal from "../../components/BookingModal";
 import Swal from "sweetalert2";
-import bg from '../../assets/bg.webp'
-
+import bg from "../../assets/bg.webp";
 
 const ActivityDetail = () => {
   const { id } = useParams();
@@ -22,7 +21,7 @@ const ActivityDetail = () => {
   const [selectedRoom, setSelectedRoom] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [bookingTime, setBookingTime] = useState([]);
-  const [time, setTime] = useState(null)
+  const [time, setTime] = useState(null);
   const [bookingDate, setBookingsDate] = useState([]);
 
   useEffect(() => {
@@ -34,7 +33,6 @@ const ActivityDetail = () => {
     if (rooms.length > 0) {
       loadBookedDates();
       loadBookings(); // ✅ โหลดข้อมูลการจอง
-
     }
   }, [rooms]);
 
@@ -72,61 +70,66 @@ const ActivityDetail = () => {
         title: "โปรดเลือกห้องก่อนทำการกดลือกวันที่",
         icon: "error",
         showConfirmButton: false,
-        timer: 1000
-      })
+        timer: 1000,
+      });
     } else {
       setSelectedDate(date);
       const localDate = new Date(date);
       const isoString = localDate.toISOString(); // แปลงเป็นรูปแบบ UTC
 
       const response = await getBookings();
-      const filteredBookingTime = response.data.filter((booked) =>
-        selectedRoom === booked.roomId && booked.bookingDate === isoString // ต้อง return true หรือ false
+      const filteredBookingTime = response.data.filter(
+        (booked) =>
+          selectedRoom === booked.roomId && booked.bookingDate === isoString // ต้อง return true หรือ false
       );
-      let bookedTime = []
+      let bookedTime = [];
 
       filteredBookingTime.forEach((data) => {
         bookedTime.push(data.bookingTime);
-      })
-      setBookingTime(bookedTime)
-
+      });
+      setBookingTime(bookedTime);
     }
-
   };
 
   const handleRoomSelect = async (roomId) => {
     setSelectedRoom(roomId);
     const response = await getBookings();
-    const filteredBookingDate = response.data.filter((booked) =>
-      selectedRoom === booked.roomId // ต้อง return true หรือ false
+    const filteredBookingDate = response.data.filter(
+      (booked) => selectedRoom === booked.roomId // ต้อง return true หรือ false
     );
-    setBookingsDate(filteredBookingDate)
+    setBookingsDate(filteredBookingDate);
     // activity.time
   };
 
   const openBookingModal = () => {
     if (!selectedRoom || !selectedDate || !time) {
       Swal.fire({
-        title:"Please select a room , a date and a time before booking.",
-        icon:"error",
-        showConfirmButton:false,
-        timer:1000
-      })
+        title: "Please select a room , a date and a time before booking.",
+        icon: "error",
+        showConfirmButton: false,
+        timer: 1000,
+      });
       return;
     }
     setShowModal(true);
   };
 
   return (
-    <div className=" h-full w-screen" style={{
-      backgroundImage: `url(${bg})`,
-      backgroundSize: "cover", // ปรับให้เต็มพื้นที่
-      backgroundPosition: "center", // จัดให้อยู่กึ่งกลาง
-      backgroundRepeat: "no-repeat", // ป้องกันการซ้ำของภาพ
-    }}>
-      <div className="container mx-auto p-6" style={{
-        opacity:'0.80'
-      }}>
+    <div
+      className=" h-full w-screen"
+      style={{
+        backgroundImage: `url(${bg})`,
+        backgroundSize: "cover", // ปรับให้เต็มพื้นที่
+        backgroundPosition: "center", // จัดให้อยู่กึ่งกลาง
+        backgroundRepeat: "no-repeat", // ป้องกันการซ้ำของภาพ
+      }}
+    >
+      <div
+        className="container mx-auto p-6"
+        style={{
+          opacity: "0.80",
+        }}
+      >
         {activity && (
           <div className="bg-white shadow-lg rounded-lg p-6">
             <h2 className="text-3xl font-bold mb-4">{activity.name}</h2>
@@ -144,8 +147,9 @@ const ActivityDetail = () => {
                 rooms.map((room) => (
                   <button
                     key={room.id}
-                    className={`btn w-full ${selectedRoom == room.id ? "btn-success" : "btn-primary"
-                      }`}
+                    className={`btn w-full ${
+                      selectedRoom == room.id ? "btn-success" : "btn-primary"
+                    }`}
                     onClick={() => handleRoomSelect(room.id)}
                   >
                     {room.name}
@@ -162,12 +166,12 @@ const ActivityDetail = () => {
               <Calendar
                 onChange={handleDateChange}
                 value={selectedDate}
-              // tileDisabled={({ date }) =>
-              // bookedDates.some(
-              //   (bookedDate) =>
-              //     bookedDate.toDateString() === date.toDateString() && bookedDate.bookingTime 
-              // )
-              // }
+                // tileDisabled={({ date }) =>
+                // bookedDates.some(
+                //   (bookedDate) =>
+                //     bookedDate.toDateString() === date.toDateString() && bookedDate.bookingTime
+                // )
+                // }
               />
             </div>
 
@@ -179,15 +183,17 @@ const ActivityDetail = () => {
                   onClick={() => {
                     setTime(data);
                   }}
-                  className={`px-3 py-2 rounded ${time === data
-                    ? "bg-yellow-400 text-white" // ถ้าถูกเลือก หรือจองไปแล้ว ให้เป็นสีเทา
-                    : (bookingTime.includes(data) ? "bg-gray-500 text-white" : "bg-green-600 text-white")// ถ้ายังไม่ได้เลือก ให้เป็นสีน้ำเงิน
-                    }`}
+                  className={`px-3 py-2 rounded ${
+                    time === data
+                      ? "bg-yellow-400 text-white" // ถ้าถูกเลือก หรือจองไปแล้ว ให้เป็นสีเทา
+                      : bookingTime.includes(data)
+                      ? "bg-gray-500 text-white"
+                      : "bg-green-600 text-white" // ถ้ายังไม่ได้เลือก ให้เป็นสีน้ำเงิน
+                  }`}
                 >
                   {data}
                 </button>
               ))}
-
             </div>
 
             {/* ปุ่มจอง */}
@@ -219,8 +225,8 @@ const ActivityDetail = () => {
                     <th className="border p-2">Room</th>
                     <th className="border p-2">Booking Date</th>
                     <th className="border p-2">Booking Time</th>
-                    <th className="border p-2">Status</th>
-                    <th className="border p-2">Payment Slip</th>
+                    {/* <th className="border p-2">Status</th>
+                    <th className="border p-2">Payment Slip</th> */}
                   </tr>
                 </thead>
                 <tbody>
@@ -234,14 +240,13 @@ const ActivityDetail = () => {
                         <td className="border p-2">
                           {new Date(booking.bookingDate).toLocaleDateString()}
                         </td>
-                        <td className="border p-2">
-                          {booking.bookingTime} น.
-                        </td>
-                        <td
-                          className={`border p-2 ${booking.status === "CONFIRMED"
-                            ? "text-green-600"
-                            : "text-yellow-600"
-                            }`}
+                        <td className="border p-2">{booking.bookingTime} น.</td>
+                        {/* <td
+                          className={`border p-2 ${
+                            booking.status === "CONFIRMED"
+                              ? "text-green-600"
+                              : "text-yellow-600"
+                          }`}
                         >
                           {booking.status}
                         </td>
@@ -258,7 +263,7 @@ const ActivityDetail = () => {
                           ) : (
                             "No Slip"
                           )}
-                        </td>
+                        </td> */}
                       </tr>
                     ))
                   ) : (
@@ -278,7 +283,6 @@ const ActivityDetail = () => {
         )}
       </div>
     </div>
-
   );
 };
 
