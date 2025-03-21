@@ -17,7 +17,7 @@ const ManageActivities = () => {
     name: "",
     maxPeople: "",
     price: "",
-    time:[]
+    time: []
   });
   const [time, setTime] = useState([])
   const [editingId, setEditingId] = useState(null);
@@ -31,7 +31,7 @@ const ManageActivities = () => {
     console.log(time)
   }, [time])
 
-  const allowedTimes = ['09.00-10.00', '10.00-11.00', '11.00-12.00', '12.00-13.00', '13.00-14.00', '14.00-15.00', '15.00-16.00', '16.00-17.00', '17.00-18.00', '18.00-19.00', '19.00-20.00', '20.00-21.00'];
+  const allowedTimes = ['AllDay', '09.00-10.00', '10.00-11.00', '11.00-12.00', '12.00-13.00', '13.00-14.00', '14.00-15.00', '15.00-16.00', '16.00-17.00', '17.00-18.00', '18.00-19.00', '19.00-20.00', '20.00-21.00'];
 
   const loadActivities = async () => {
     const response = await getActivities();
@@ -47,12 +47,12 @@ const ManageActivities = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if(time.length == 0){
+    if (time.length == 0) {
       Swal.fire({
-        title:"โปรดเลือกเวลาที่เปิด",
-        icon:"error",
-        timer:1500,
-        showConfirmButton:false
+        title: "โปรดเลือกเวลาที่เปิด",
+        icon: "error",
+        timer: 1500,
+        showConfirmButton: false
       })
       return
     }
@@ -61,7 +61,7 @@ const ManageActivities = () => {
       name: formData.name,
       maxPeople: Number(formData.maxPeople),
       price: Number(formData.price),
-      time:time
+      time: time
     };
 
     console.log(formattedData)
@@ -70,25 +70,25 @@ const ManageActivities = () => {
       setEditingId(null);
       setTime([])
       Swal.fire({
-        title:"แก้ไขกิจกรรมเสร็จสิ้น",
-        icon:"success",
-        timer:1500,
-        showConfirmButton:false
+        title: "แก้ไขกิจกรรมเสร็จสิ้น",
+        icon: "success",
+        timer: 1500,
+        showConfirmButton: false
       })
     } else {
       console.log(formattedData);
       await createActivity(formattedData);
       setTime([])
       Swal.fire({
-        title:"แก้ไขกิจกรรมเสร็จสิ้น",
-        icon:"success",
-        timer:1500,
-        showConfirmButton:false
+        title: "แก้ไขกิจกรรมเสร็จสิ้น",
+        icon: "success",
+        timer: 1500,
+        showConfirmButton: false
       })
     }
-    setFormData({ placeId: "", name: "", maxPeople: "", price: "",time:[] });
+    setFormData({ placeId: "", name: "", maxPeople: "", price: "", time: [] });
     loadActivities();
-    
+
   };
 
   const handleEdit = (activity) => {
@@ -97,7 +97,7 @@ const ManageActivities = () => {
       name: activity.name,
       maxPeople: activity.maxPeople,
       price: activity.price,
-      time:activity.time,
+      time: activity.time,
     });
     setTime(activity.time)
     setEditingId(activity.id);
@@ -113,7 +113,7 @@ const ManageActivities = () => {
       confirmButtonText: "ใช่, ลบเลย!",
       cancelButtonText: "ยกเลิก",
     });
-  
+
     if (result.isConfirmed) {
       await deleteActivity(id);
       loadActivities();
@@ -124,28 +124,36 @@ const ManageActivities = () => {
   const removeTime = (indexToRemove) => {
     setTime(time.filter((_, index) => index !== indexToRemove)); // ลบค่าตาม index
   };
-
   const setTimer = (e) => {
     const newTime = e.target.value;
-
-    // ตรวจสอบว่ามีค่าซ้ำหรือไม่
-    const isDuplicate = time.some((data) => data === newTime);
-
-    if (isDuplicate) {
-      Swal.fire({
-        title: "เลือกเวลาซ้ำ",
-        icon: "error",
-        timer: 1000,
-        showConfirmButton: false
+  
+    if (newTime == "จองรายคน") {
+      setTime(["จองรายวัน"]); // ล้างทั้งหมด และเพิ่ม "จองรายวัน" เท่านั้น
+      setSelectedTime(""); // รีเซ็ตค่า select
+    } else {
+      setTime((prevTimes) => {
+        // ถ้ามี "จองรายวัน" ให้ลบออกก่อน
+        const filteredTimes = prevTimes.filter((t) => t !== "จองรายวัน");
+  
+        // ตรวจสอบว่ามีค่าซ้ำหรือไม่
+        const isDuplicate = filteredTimes.includes(newTime);
+        if (isDuplicate) {
+          Swal.fire({
+            title: "เลือกเวลาซ้ำ",
+            icon: "error",
+            timer: 1000,
+            showConfirmButton: false
+          });
+          return filteredTimes; // คืนค่าของเดิม (ไม่เพิ่ม)
+        }
+  
+        return [...filteredTimes, newTime]; // เพิ่มค่าใหม่เข้าไป
       });
-      return; // หยุดฟังก์ชันที่นี่
-    }
-
-    if (newTime) {
-      setTime((prevTimes) => [...prevTimes, newTime]); // เพิ่มค่าเข้า state
+  
       setSelectedTime(""); // รีเซ็ตค่า select
     }
   };
+  
 
   return (
     <div>
@@ -198,7 +206,7 @@ const ManageActivities = () => {
         <select onChange={setTimer} value={selectedTime}>
           <option value="" disabled>เลือกเวลา</option>
           {allowedTimes.map((time, index) => (
-            <option key={index} value={time}>{time}</option>
+            <option key={index} value={time}>{time=="AllDay"?"จองรายวัน":time}</option>
           ))}
         </select>
 
@@ -209,7 +217,7 @@ const ManageActivities = () => {
       <div className="my-3 flex flex-wrap gap-2">
         {time && time.map((data, index) => (
           <span key={index} className="rounded-lg bg-white px-2 py-2 bg-gray-200">
-            {data}{" "}
+            {data=="AllDay"?"จองรายวัน":data}{" "}
             <button
               className="ms-2 bg-red-500 text-white px-1 rounded"
               onClick={() => removeTime(index)}

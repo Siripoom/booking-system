@@ -6,6 +6,7 @@ import Swal from "sweetalert2";
 const BookingModal = ({ date, roomId, onClose , bookingTime}) => {
   const [file, setFile] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [peopleCode , setPeopleCode] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
 
   const handleFileChange = (e) => {
@@ -30,6 +31,7 @@ const BookingModal = ({ date, roomId, onClose , bookingTime}) => {
       formData.append("status", "PENDING");
       formData.append("paymentSlip", file);
       formData.append("bookingTime",bookingTime);
+      formData.append("userCode",peopleCode)
       // ส่งข้อมูลไปที่ Backend
       console.log(formData);
       await createBooking(formData);
@@ -42,7 +44,7 @@ const BookingModal = ({ date, roomId, onClose , bookingTime}) => {
         timer:1500
       })
       onClose();
-      window.location.reload();
+      // window.location.reload();
     } catch (error) {
       console.error("Booking failed:", error);
       setErrorMessage("Failed to create booking. Please try again.");
@@ -64,6 +66,13 @@ const BookingModal = ({ date, roomId, onClose , bookingTime}) => {
         <p>
           Bank Account: <strong>SCB </strong>
         </p>
+        <label className="block mt-4 font-semibold">Prople Code</label>
+        <input
+          type="text"
+          className="input input-warning w-full mt-2"
+          onChange={(e) => {setPeopleCode(e.target.value)}}
+          required
+        />
 
         {/* อัพโหลดไฟล์ */}
         <label className="block mt-4 font-semibold">Upload Payment Slip:</label>

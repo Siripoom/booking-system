@@ -22,6 +22,8 @@ const ActivityDetail = () => {
   const [showModal, setShowModal] = useState(false);
   const [bookingTime, setBookingTime] = useState([]);
   const [time, setTime] = useState(null);
+  const [type, setType] = useState(null);
+  const [indexRoom, setIndexRoom] = useState(0)
   const [bookingDate, setBookingsDate] = useState([]);
 
   useEffect(() => {
@@ -73,21 +75,27 @@ const ActivityDetail = () => {
         timer: 1000,
       });
     } else {
+
       setSelectedDate(date);
       const localDate = new Date(date);
       const isoString = localDate.toISOString(); // แปลงเป็นรูปแบบ UTC
-
       const response = await getBookings();
       const filteredBookingTime = response.data.filter(
         (booked) =>
           selectedRoom === booked.roomId && booked.bookingDate === isoString // ต้อง return true หรือ false
       );
-      let bookedTime = [];
 
-      filteredBookingTime.forEach((data) => {
-        bookedTime.push(data.bookingTime);
-      });
-      setBookingTime(bookedTime);
+      if (type == 'AllDay') {
+        let count = filteredBookingTime.length
+        setIndexRoom(count)
+      } else {
+        let bookedTime = [];
+        filteredBookingTime.forEach((data) => {
+          bookedTime.push(data.bookingTime);
+        });
+        setBookingTime(bookedTime);
+      }
+
     }
   };
 
@@ -98,11 +106,11 @@ const ActivityDetail = () => {
       (booked) => selectedRoom === booked.roomId // ต้อง return true หรือ false
     );
     setBookingsDate(filteredBookingDate);
-    // activity.time
+    setType(activity.time[0] == 'AllDay' ? 'AllDay' : 'selectTime')
   };
 
   const openBookingModal = () => {
-    if (!selectedRoom || !selectedDate || !time) {
+    if (!selectedRoom || !selectedDate || !((type != "AllDay" && time) || (type == "AllDay" && !time))) {
       Swal.fire({
         title: "Please select a room , a date and a time before booking.",
         icon: "error",
@@ -111,6 +119,17 @@ const ActivityDetail = () => {
       });
       return;
     }
+    if(type == "AllDay" && indexRoom >= activity.maxPeople){
+      Swal.fire({
+        title:"Cannot booking this room ",
+        text:"this room is full",
+        icon:"error",
+        timer:2000,
+        showConfirmButton:false
+      })
+      return ; 
+    }
+
     setShowModal(true);
   };
 
@@ -147,9 +166,8 @@ const ActivityDetail = () => {
                 rooms.map((room) => (
                   <button
                     key={room.id}
-                    className={`btn w-full ${
-                      selectedRoom == room.id ? "btn-success" : "btn-primary"
-                    }`}
+                    className={`btn w-full ${selectedRoom == room.id ? "btn-success" : "btn-primary"
+                      }`}
                     onClick={() => handleRoomSelect(room.id)}
                   >
                     {room.name}
@@ -166,34 +184,61 @@ const ActivityDetail = () => {
               <Calendar
                 onChange={handleDateChange}
                 value={selectedDate}
-                // tileDisabled={({ date }) =>
-                // bookedDates.some(
-                //   (bookedDate) =>
-                //     bookedDate.toDateString() === date.toDateString() && bookedDate.bookingTime
-                // )
-                // }
+              // tileDisabled={ async ({ date }) => {
+              //   const localDate = new Date(date);
+              //   const isoString = localDate.toISOString(); // แปลงเป็นรูปแบบ UTC
+
+              //   const response = await getBookings();
+              //   const filteredBookingTime = response.data.filter(
+              //     (booked) =>
+              //       selectedRoom === booked.roomId && booked.bookingDate === isoString // ต้อง return true หรือ false
+              //   );
+              //   if (type === "AllDay") {
+              //     const isBooked = filteredBookingTime.some(b => b.bookingDate === isoString);
+
+              //     if (isBooked) {
+              //       const block = filteredBookingTime.find(b => b.bookingDate === isoString)?.length || 0;
+
+              //       return block >= activity.maxPeople;
+              //     }
+              //   }
+              //   return false;
+              // }
+              // }
               />
             </div>
 
             <div className="flex gap-2 mt-5 justify-center">
-              {activity.time.map((data) => (
+              {activity.time != 'AllDay' && activity.time.map((data) => (
                 <button
                   key={data}
                   disabled={bookingTime.includes(data)} // ถ้ามีใน bookingTime ให้กดไม่ได้
                   onClick={() => {
                     setTime(data);
                   }}
-                  className={`px-3 py-2 rounded ${
-                    time === data
-                      ? "bg-yellow-400 text-white" // ถ้าถูกเลือก หรือจองไปแล้ว ให้เป็นสีเทา
-                      : bookingTime.includes(data)
+                  className={`px-3 py-2 rounded ${time === data
+                    ? "bg-yellow-400 text-white" // ถ้าถูกเลือก หรือจองไปแล้ว ให้เป็นสีเทา
+                    : bookingTime.includes(data)
                       ? "bg-gray-500 text-white"
                       : "bg-green-600 text-white" // ถ้ายังไม่ได้เลือก ให้เป็นสีน้ำเงิน
-                  }`}
+                    }`}
                 >
                   {data}
                 </button>
               ))}
+
+              {activity.time == 'AllDay' ? (
+                <div
+                  className={`flex justify-center rounded p-4 text-2xl text-white ${indexRoom >= activity.maxPeople ? "bg-red-500" : "bg-gray-500"
+                    }`}
+                >
+                  {`จองแล้ว ${indexRoom} / ${activity.maxPeople}`}
+                </div>
+
+              ) : (
+                <>
+                </>
+              )}
             </div>
 
             {/* ปุ่มจอง */}
@@ -208,7 +253,7 @@ const ActivityDetail = () => {
               <BookingModal
                 date={selectedDate}
                 roomId={selectedRoom}
-                bookingTime={time}
+                bookingTime={type === "AllDay" ? "AllDay" : time}
                 onClose={() => {
                   setShowModal(false);
                   loadBookings(); // ✅ รีโหลดข้อมูลการจองเมื่อจองเสร็จ

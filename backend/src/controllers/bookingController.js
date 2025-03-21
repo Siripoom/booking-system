@@ -5,7 +5,7 @@ const prisma = new PrismaClient();
 // 🔹 ดึงการจองทั้งหมด// 🔹 สร้างการจองใหม่ พร้อมอัพโหลดไฟล์
 exports.createBooking = async (req, res) => {
   try {
-    const { userId, roomId, bookingDate, status,bookingTime } = req.body;
+    const { userId, roomId, bookingDate, status,bookingTime,userCode } = req.body;
     let paymentSlip = null;
 
     // ตรวจสอบว่ามีไฟล์แนบหรือไม่
@@ -22,7 +22,8 @@ exports.createBooking = async (req, res) => {
         bookingDate: new Date(bookingDate),
         status: status || "PENDING",
         paymentSlip,
-        bookingTime
+        bookingTime,
+        userCode
       },
     });
 
