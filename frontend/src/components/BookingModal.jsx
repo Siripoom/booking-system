@@ -1,13 +1,32 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import PropTypes from "prop-types";
-import { createBooking } from "../services/apiService";
+import { createBooking, getUserCodes, createUserCode, editUserCode } from "../services/apiService";
 import Swal from "sweetalert2";
 
-const BookingModal = ({ date, roomId, onClose , bookingTime}) => {
+
+const BookingModal = ({ date, roomId, onClose, bookingTime }) => {
   const [file, setFile] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
-  const [peopleCode , setPeopleCode] = useState("");
+  const [peopleCode, setPeopleCode] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+  const [userCodes, setUserCodes] = useState(null);
+  const [dataUserCode, setDataUserCode] = useState(null);
+
+
+  useEffect(() => {
+    const fetchUserCodes = async () => {
+      try {
+        const response = await getUserCodes(localStorage.getItem("userId"));
+        console.log(response)
+        setDataUserCode(response.data);
+        setUserCodes(response.data[0]?.code || null);
+        setPeopleCode(response.data[0]?.code || null);
+      } catch (error) {
+        console.error("Error fetching user codes:", error);
+      }
+    };
+    fetchUserCodes();
+  }, []);
 
   const handleFileChange = (e) => {
     setFile(e.target.files[0]);
@@ -22,6 +41,23 @@ const BookingModal = ({ date, roomId, onClose , bookingTime}) => {
     setIsUploading(true);
     setErrorMessage("");
 
+    if (peopleCode === "") {
+      setErrorMessage("Please input a user code before booking.");
+      return;
+    }
+
+    if (userCodes === null) {
+      const res = await createUserCode(localStorage.getItem("userId"), { code: peopleCode });
+      console.log("res", res);
+    }
+
+    if (peopleCode !== userCodes && userCodes !== null) {
+
+      const res = await editUserCode(dataUserCode[0].id , userCodes.id, { code: peopleCode });
+      console.log("res", res);
+    }
+
+
     try {
       // สร้าง FormData สำหรับอัพโหลดไฟล์
       const formData = new FormData();
@@ -30,18 +66,18 @@ const BookingModal = ({ date, roomId, onClose , bookingTime}) => {
       formData.append("bookingDate", date.toISOString());
       formData.append("status", "PENDING");
       formData.append("paymentSlip", file);
-      formData.append("bookingTime",bookingTime);
-      formData.append("userCode",peopleCode)
+      formData.append("bookingTime", bookingTime);
+      formData.append("userCode", peopleCode)
       // ส่งข้อมูลไปที่ Backend
       console.log(formData);
       await createBooking(formData);
 
       // alert("Booking successful!");
       Swal.fire({
-        title:"successful",
-        icon:"success",
-        showConfirmButton:false,
-        timer:1500
+        title: "successful",
+        icon: "success",
+        showConfirmButton: false,
+        timer: 1500
       })
       onClose();
       // window.location.reload();
@@ -69,8 +105,9 @@ const BookingModal = ({ date, roomId, onClose , bookingTime}) => {
         <label className="block mt-4 font-semibold">Prople Code</label>
         <input
           type="text"
+          value={peopleCode || ""}
           className="input input-warning w-full mt-2"
-          onChange={(e) => {setPeopleCode(e.target.value)}}
+          onChange={(e) => { setPeopleCode(e.target.value) }}
           required
         />
 

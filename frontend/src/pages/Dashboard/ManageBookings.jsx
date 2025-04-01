@@ -152,7 +152,7 @@ const ManageBookings = () => {
               <td className="border p-2">
                 {booking.paymentSlip ? (
                   <a
-                    href={`http://localhost:5000${booking.paymentSlip}`}
+                    href={`http://localhost:4000${booking.paymentSlip}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-blue-500 underline"
