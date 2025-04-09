@@ -130,8 +130,11 @@ const ManageBookings = () => {
         <thead>
           <tr>
             <th>User</th>
-            <th>Room</th>
+            <th>Place</th>
             <th>Booking Date</th>
+            <th>Booking Time</th>
+            <th>Number of People</th>
+            <th>Total Price</th>
             <th>Status</th>
             <th>Actions</th>
           </tr>
@@ -148,11 +151,14 @@ const ManageBookings = () => {
                   "Unknown"}
               </td>
               <td>{booking.bookingDate.split("T")[0]}</td>
+              <td>{booking.bookingTime}</td>
+              <td>{booking.numberOfPeople}</td>
+              <td>{booking.totalPrice}</td>
               <td>{booking.status}</td>
               <td className="border p-2">
                 {booking.paymentSlip ? (
                   <a
-                    href={`http://localhost:5000${booking.paymentSlip}`}
+                    href={`http://localhost:4000${booking.paymentSlip}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-blue-500 underline"

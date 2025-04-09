@@ -22,6 +22,7 @@ const ActivityDetail = () => {
   const [showModal, setShowModal] = useState(false);
   const [bookingTime, setBookingTime] = useState([]);
   const [time, setTime] = useState(null);
+  const [roomName, setRoomName] = useState(null);
   const [bookingDate, setBookingsDate] = useState([]);
 
   useEffect(() => {
@@ -67,7 +68,7 @@ const ActivityDetail = () => {
   const handleDateChange = async (date) => {
     if (selectedRoom == null) {
       Swal.fire({
-        title: "โปรดเลือกห้องก่อนทำการกดลือกวันที่",
+        title: "โปรดเลือกห้องก่อนทำการกดเลือกวันที่",
         icon: "error",
         showConfirmButton: false,
         timer: 1000,
@@ -91,8 +92,9 @@ const ActivityDetail = () => {
     }
   };
 
-  const handleRoomSelect = async (roomId) => {
+  const handleRoomSelect = async (roomId, roomName) => {
     setSelectedRoom(roomId);
+    setRoomName(roomName);
     const response = await getBookings();
     const filteredBookingDate = response.data.filter(
       (booked) => selectedRoom === booked.roomId // ต้อง return true หรือ false
@@ -104,7 +106,7 @@ const ActivityDetail = () => {
   const openBookingModal = () => {
     if (!selectedRoom || !selectedDate || !time) {
       Swal.fire({
-        title: "Please select a room , a date and a time before booking.",
+        title: "โปรดเลือกห้อง วันที่ และเวลา ก่อนทำการจอง",
         icon: "error",
         showConfirmButton: false,
         timer: 1000,
@@ -134,14 +136,14 @@ const ActivityDetail = () => {
           <div className="bg-white shadow-lg rounded-lg p-6">
             <h2 className="text-3xl font-bold mb-4">{activity.name}</h2>
             <p className="text-lg">
-              Max People: <strong>{activity.maxPeople}</strong>
+              จำนวนคนสูงสุด: <strong>{activity.maxPeople}</strong>
             </p>
             <p className="text-lg">
-              Price: <strong>${activity.price}</strong>
+              ราคา: <strong>${activity.price}</strong>
             </p>
 
             {/* รายการห้อง */}
-            <h3 className="text-xl font-semibold mt-6">Select a Room</h3>
+            <h3 className="text-xl font-semibold mt-6">เลือกห้อง</h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
               {rooms.length > 0 ? (
                 rooms.map((room) => (
@@ -150,29 +152,22 @@ const ActivityDetail = () => {
                     className={`btn w-full ${
                       selectedRoom == room.id ? "btn-success" : "btn-primary"
                     }`}
-                    onClick={() => handleRoomSelect(room.id)}
+                    onClick={() => handleRoomSelect(room.id, room.name)}
                   >
                     {room.name}
                   </button>
                 ))
               ) : (
-                <p className="text-red-500">No rooms available.</p>
+                <p className="text-red-500">ไม่มีห้องว่าง</p>
               )}
             </div>
 
             {/* ปฏิทิน */}
-            <h3 className="text-xl font-semibold mt-6">Select Date to Book</h3>
+            <h3 className="text-xl font-semibold mt-6">
+              เลือกวันที่เพื่อทำการจอง
+            </h3>
             <div className="flex justify-center mt-4">
-              <Calendar
-                onChange={handleDateChange}
-                value={selectedDate}
-                // tileDisabled={({ date }) =>
-                // bookedDates.some(
-                //   (bookedDate) =>
-                //     bookedDate.toDateString() === date.toDateString() && bookedDate.bookingTime
-                // )
-                // }
-              />
+              <Calendar onChange={handleDateChange} value={selectedDate} />
             </div>
 
             <div className="flex gap-2 mt-5 justify-center">
@@ -199,7 +194,7 @@ const ActivityDetail = () => {
             {/* ปุ่มจอง */}
             <div className="flex justify-center mt-6">
               <button className="btn btn-success" onClick={openBookingModal}>
-                Proceed to Booking
+                ทำการจอง
               </button>
             </div>
 
@@ -209,6 +204,9 @@ const ActivityDetail = () => {
                 date={selectedDate}
                 roomId={selectedRoom}
                 bookingTime={time}
+                maxPeople={activity.maxPeople}
+                roomName={roomName}
+                price={activity.price}
                 onClose={() => {
                   setShowModal(false);
                   loadBookings(); // ✅ รีโหลดข้อมูลการจองเมื่อจองเสร็จ
@@ -217,16 +215,14 @@ const ActivityDetail = () => {
             )}
 
             {/* รายการจองที่มีอยู่ */}
-            <h3 className="text-xl font-semibold mt-8">Existing Bookings</h3>
+            <h3 className="text-xl font-semibold mt-8">รายการจองที่มีอยู่</h3>
             <div className="overflow-x-auto mt-4">
               <table className="table w-full border-collapse border border-gray-300">
                 <thead>
                   <tr className="bg-gray-100">
-                    <th className="border p-2">Room</th>
-                    <th className="border p-2">Booking Date</th>
-                    <th className="border p-2">Booking Time</th>
-                    {/* <th className="border p-2">Status</th>
-                    <th className="border p-2">Payment Slip</th> */}
+                    <th className="border p-2">สถานที่</th>
+                    <th className="border p-2">วันที่จอง</th>
+                    <th className="border p-2">เวลาที่จอง</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -235,35 +231,12 @@ const ActivityDetail = () => {
                       <tr key={booking.id}>
                         <td className="border p-2">
                           {rooms.find((room) => room.id === booking.roomId)
-                            ?.name || "Unknown"}
+                            ?.name || "ไม่ทราบ"}
                         </td>
                         <td className="border p-2">
                           {new Date(booking.bookingDate).toLocaleDateString()}
                         </td>
                         <td className="border p-2">{booking.bookingTime} น.</td>
-                        {/* <td
-                          className={`border p-2 ${
-                            booking.status === "CONFIRMED"
-                              ? "text-green-600"
-                              : "text-yellow-600"
-                          }`}
-                        >
-                          {booking.status}
-                        </td>
-                        <td className="border p-2">
-                          {booking.paymentSlip ? (
-                            <a
-                              href={`http://localhost:5000${booking.paymentSlip}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-blue-500 underline"
-                            >
-                              View Slip
-                            </a>
-                          ) : (
-                            "No Slip"
-                          )}
-                        </td> */}
                       </tr>
                     ))
                   ) : (
@@ -272,7 +245,7 @@ const ActivityDetail = () => {
                         colSpan="4"
                         className="border p-2 text-center text-gray-500"
                       >
-                        No bookings found.
+                        ไม่มีรายการจอง
                       </td>
                     </tr>
                   )}

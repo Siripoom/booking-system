@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { loginUser } from "../../services/apiService";
 import { useNavigate, Link } from "react-router-dom";
-import bg from '../../assets/bg2.webp'
+import bg from "../../assets/bg2.webp";
 import Swal from "sweetalert2";
 const Login = () => {
   const [formData, setFormData] = useState({ email: "", password: "" });
@@ -17,6 +17,7 @@ const Login = () => {
     setLoading(true);
     try {
       const response = await loginUser(formData);
+      console.log(response.data); // ดูข้อมูลที่ได้รับจาก API
       localStorage.setItem("token", response.data.token);
       localStorage.setItem("username", response.data.user.fullName);
       localStorage.setItem("role", response.data.user.role);
@@ -27,17 +28,20 @@ const Login = () => {
 
       // alert("Login successful!");
       Swal.fire({
-        title:"Login successful!",
-        icon:"success",
-        showConfirmButton:false,
-        timer:1500
-      })
+        title: "Login successful!",
+        icon: "success",
+        showConfirmButton: false,
+        timer: 1500,
+      });
 
-      // ส่งผู้ใช้ไปหน้าหลักถ้าเป็น USER แต่ถ้าเป็น ADMIN ส่งไปหน้าจัดการการจอง
+      // ตรวจสอบ role และนำทางไปที่หน้าที่ถูกต้อง
       if (response.data.user.role === "ADMIN") {
+        console.log("Navigating to /admin"); // ดีบัก
         navigate("/admin");
+      } else {
+        console.log("Navigating to /"); // ดีบัก
+        navigate("/");
       }
-      navigate("/");
     } catch (error) {
       alert("Error: " + error.response?.data?.message || "Login failed");
     } finally {
@@ -46,15 +50,21 @@ const Login = () => {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100" style={{
-      backgroundImage: `url(${bg})`,
-      backgroundSize: "cover", // ปรับให้เต็มพื้นที่
-      backgroundPosition: "center", // จัดให้อยู่กึ่งกลาง
-      backgroundRepeat: "no-repeat", // ป้องกันการซ้ำของภาพ
-    }}>
-      <div className="card w-96 bg-white shadow-xl p-6" style={{
-        opacity:'0.95'
-      }}>
+    <div
+      className="flex items-center justify-center min-h-screen bg-gray-100"
+      style={{
+        backgroundImage: `url(${bg})`,
+        backgroundSize: "cover", // ปรับให้เต็มพื้นที่
+        backgroundPosition: "center", // จัดให้อยู่กึ่งกลาง
+        backgroundRepeat: "no-repeat", // ป้องกันการซ้ำของภาพ
+      }}
+    >
+      <div
+        className="card w-96 bg-white shadow-xl p-6"
+        style={{
+          opacity: "0.95",
+        }}
+      >
         <h2 className="text-2xl font-bold text-center">Login</h2>
         <form onSubmit={handleSubmit} className="mt-4">
           <input

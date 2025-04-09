@@ -8,14 +8,14 @@ datasource db {
 }
 
 model User {
-  id          String   @id @default(uuid()) @unique
+  id          String    @id @unique @default(uuid())
   fullName    String
-  email       String   @unique
+  email       String    @unique
   password    String
-  role        Role     @default(USER)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
+  role        Role      @default(USER)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  phoneNumber String
   bookings    Booking[]
 }
 
@@ -25,42 +25,44 @@ model Place {
   description String?
   createdAt   DateTime @default(now())
 
-  activities  Activity[]
+  activities Activity[]
 }
 
 model Activity {
-  id          Int      @id @default(autoincrement())
-  place       Place    @relation(fields: [placeId], references: [id], onDelete: Cascade)
-  placeId     Int
-  name        String
-  maxPeople   Int
-  price       Float
-  createdAt   DateTime @default(now())
-  time        String[]
-  rooms       Room[]
+  id        Int      @id @default(autoincrement())
+  place     Place    @relation(fields: [placeId], references: [id], onDelete: Cascade)
+  placeId   Int
+  name      String
+  maxPeople Int
+  price     Float
+  createdAt DateTime @default(now())
+  time      String[]
+  rooms     Room[]
 }
 
 model Room {
-  id          Int      @id @default(autoincrement())
-  activity    Activity @relation(fields: [activityId], references: [id], onDelete: Cascade)
-  activityId  Int
-  name        String
-  createdAt   DateTime @default(now())
+  id         Int      @id @default(autoincrement())
+  activity   Activity @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  activityId Int
+  name       String
+  createdAt  DateTime @default(now())
 
-  bookings    Booking[]
+  bookings Booking[]
 }
 
 model Booking {
-  id          Int      @id @default(autoincrement())
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId      String
-  room        Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
-  roomId      Int
-  bookingDate DateTime
-  bookingTime String
-  paymentSlip String
-  status      BookingStatus @default(PENDING)
-  createdAt   DateTime @default(now())
+  id             Int           @id @default(autoincrement())
+  user           User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId         String
+  room           Room          @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  roomId         Int
+  bookingDate    DateTime
+  bookingTime    String
+  paymentSlip    String
+  status         BookingStatus @default(PENDING)
+  createdAt      DateTime      @default(now())
+  numberOfPeople Int
+  totalPrice     Float
 }
 
 enum Role {
