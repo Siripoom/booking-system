@@ -130,6 +130,7 @@ const ManageBookings = () => {
         <thead>
           <tr>
             <th>User</th>
+            <th>User Code</th>
             <th>Place</th>
             <th>Booking Date</th>
             <th>Booking Time</th>
@@ -146,6 +147,7 @@ const ManageBookings = () => {
                 {users.find((user) => user.id === booking.userId)?.fullName ||
                   "Unknown"}
               </td>
+              <td>{booking.userCode}</td>
               <td>
                 {rooms.find((room) => room.id === booking.roomId)?.name ||
                   "Unknown"}

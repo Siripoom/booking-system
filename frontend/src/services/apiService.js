@@ -29,6 +29,13 @@ export const getUserById = (id) => api.get(`/users/${id}`);
 export const createUser = (userData) => api.post("/users", userData);
 export const updateUser = (id, userData) => api.put(`/users/${id}`, userData);
 export const deleteUser = (id) => api.delete(`/users/${id}`);
+export const getUserCodes = (id) => api.get(`/users/${id}/userCodes`);
+export const createUserCode = (id, userCodeData) =>
+  api.post(`/users/${id}/userCodes`, userCodeData);
+export const editUserCode = (id, codeId, userCodeData) =>
+  api.put(`/users/${id}/userCodes/${codeId}`, userCodeData);
+export const deleteUserCode = (id, codeId) =>
+  api.delete(`/users/${id}/userCodes/${codeId}`);
 
 // ======================= Place APIs =======================
 export const getPlaces = () => api.get("/places");

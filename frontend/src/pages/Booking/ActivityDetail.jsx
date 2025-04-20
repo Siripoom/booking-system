@@ -15,15 +15,15 @@ const ActivityDetail = () => {
   const { id } = useParams();
   const [activity, setActivity] = useState(null);
   const [rooms, setRooms] = useState([]);
-  const [bookedDates, setBookedDates] = useState([]);
-  const [bookings, setBookings] = useState([]); // ✅ เก็บข้อมูลการจองทั้งหมด
+  const [bookings, setBookings] = useState([]);
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedRoom, setSelectedRoom] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [bookingTime, setBookingTime] = useState([]);
   const [time, setTime] = useState(null);
   const [roomName, setRoomName] = useState(null);
-  const [bookingDate, setBookingsDate] = useState([]);
+  const [type, setType] = useState(null);
+  const [indexRoom, setIndexRoom] = useState(0);
 
   useEffect(() => {
     loadActivity();
@@ -32,10 +32,13 @@ const ActivityDetail = () => {
 
   useEffect(() => {
     if (rooms.length > 0) {
-      loadBookedDates();
-      loadBookings(); // ✅ โหลดข้อมูลการจอง
+      loadBookings();
     }
   }, [rooms]);
+
+  const isSameDate = (date1, date2) => {
+    return new Date(date1).toDateString() === new Date(date2).toDateString();
+  };
 
   const loadActivity = async () => {
     const response = await getActivityById(id);
@@ -47,22 +50,12 @@ const ActivityDetail = () => {
     setRooms(response.data.filter((room) => room.activityId === Number(id)));
   };
 
-  const loadBookedDates = async () => {
-    const response = await getBookings();
-    const filteredBookings = response.data.filter((booking) =>
-      rooms.some((room) => room.id === booking.roomId)
-    );
-    setBookedDates(
-      filteredBookings.map((booking) => new Date(booking.bookingDate))
-    );
-  };
-
   const loadBookings = async () => {
     const response = await getBookings();
-    const filteredBookings = response.data.filter((booking) =>
+    const filtered = response.data.filter((booking) =>
       rooms.some((room) => room.id === booking.roomId)
     );
-    setBookings(filteredBookings); // ✅ บันทึกข้อมูลการจองทั้งหมด
+    setBookings(filtered);
   };
 
   const handleDateChange = async (date) => {
@@ -73,38 +66,41 @@ const ActivityDetail = () => {
         showConfirmButton: false,
         timer: 1000,
       });
+      return;
+    }
+
+    setSelectedDate(date);
+
+    const response = await getBookings();
+    const filteredBookingTime = response.data.filter(
+      (booked) =>
+        booked.roomId === selectedRoom && isSameDate(booked.bookingDate, date)
+    );
+
+    if (type === "AllDay") {
+      setIndexRoom(filteredBookingTime.length);
     } else {
-      setSelectedDate(date);
-      const localDate = new Date(date);
-      const isoString = localDate.toISOString(); // แปลงเป็นรูปแบบ UTC
-
-      const response = await getBookings();
-      const filteredBookingTime = response.data.filter(
-        (booked) =>
-          selectedRoom === booked.roomId && booked.bookingDate === isoString // ต้อง return true หรือ false
-      );
-      let bookedTime = [];
-
-      filteredBookingTime.forEach((data) => {
-        bookedTime.push(data.bookingTime);
-      });
-      setBookingTime(bookedTime);
+      setBookingTime(filteredBookingTime.map((b) => b.bookingTime));
     }
   };
 
-  const handleRoomSelect = async (roomId, roomName) => {
+  const handleRoomSelect = async (roomId, name) => {
     setSelectedRoom(roomId);
-    setRoomName(roomName);
+    setRoomName(name);
+    setTime(null);
+    setSelectedDate(null);
+
     const response = await getBookings();
-    const filteredBookingDate = response.data.filter(
-      (booked) => selectedRoom === booked.roomId // ต้อง return true หรือ false
-    );
-    setBookingsDate(filteredBookingDate);
-    // activity.time
+    const filtered = response.data.filter((b) => b.roomId === roomId);
+    setType(activity.time[0] === "AllDay" ? "AllDay" : "selectTime");
   };
 
   const openBookingModal = () => {
-    if (!selectedRoom || !selectedDate || !time) {
+    if (
+      !selectedRoom ||
+      !selectedDate ||
+      !((type !== "AllDay" && time) || (type === "AllDay" && !time))
+    ) {
       Swal.fire({
         title: "โปรดเลือกห้อง วันที่ และเวลา ก่อนทำการจอง",
         icon: "error",
@@ -113,25 +109,32 @@ const ActivityDetail = () => {
       });
       return;
     }
+
+    if (type === "AllDay" && indexRoom >= activity.maxPeople) {
+      Swal.fire({
+        title: "ไม่สามารถจองได้",
+        text: "ห้องนี้เต็มแล้วในวันนี้",
+        icon: "error",
+        timer: 2000,
+        showConfirmButton: false,
+      });
+      return;
+    }
+
     setShowModal(true);
   };
 
   return (
     <div
-      className=" h-full w-screen"
+      className="h-full w-screen"
       style={{
         backgroundImage: `url(${bg})`,
-        backgroundSize: "cover", // ปรับให้เต็มพื้นที่
-        backgroundPosition: "center", // จัดให้อยู่กึ่งกลาง
-        backgroundRepeat: "no-repeat", // ป้องกันการซ้ำของภาพ
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
       }}
     >
-      <div
-        className="container mx-auto p-6"
-        style={{
-          opacity: "0.80",
-        }}
-      >
+      <div className="container mx-auto p-6" style={{ opacity: "0.85" }}>
         {activity && (
           <div className="bg-white shadow-lg rounded-lg p-6">
             <h2 className="text-3xl font-bold mb-4">{activity.name}</h2>
@@ -139,10 +142,10 @@ const ActivityDetail = () => {
               จำนวนคนสูงสุด: <strong>{activity.maxPeople}</strong>
             </p>
             <p className="text-lg">
-              ราคา: <strong>${activity.price}</strong>
+              ราคา: <strong>{activity.price} บาท</strong>
             </p>
 
-            {/* รายการห้อง */}
+            {/* ห้อง */}
             <h3 className="text-xl font-semibold mt-6">เลือกห้อง</h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
               {rooms.length > 0 ? (
@@ -150,7 +153,7 @@ const ActivityDetail = () => {
                   <button
                     key={room.id}
                     className={`btn w-full ${
-                      selectedRoom == room.id ? "btn-success" : "btn-primary"
+                      selectedRoom === room.id ? "btn-success" : "btn-primary"
                     }`}
                     onClick={() => handleRoomSelect(room.id, room.name)}
                   >
@@ -170,25 +173,37 @@ const ActivityDetail = () => {
               <Calendar onChange={handleDateChange} value={selectedDate} />
             </div>
 
-            <div className="flex gap-2 mt-5 justify-center">
-              {activity.time.map((data) => (
-                <button
-                  key={data}
-                  disabled={bookingTime.includes(data)} // ถ้ามีใน bookingTime ให้กดไม่ได้
-                  onClick={() => {
-                    setTime(data);
-                  }}
-                  className={`px-3 py-2 rounded ${
-                    time === data
-                      ? "bg-yellow-400 text-white" // ถ้าถูกเลือก หรือจองไปแล้ว ให้เป็นสีเทา
-                      : bookingTime.includes(data)
-                      ? "bg-gray-500 text-white"
-                      : "bg-green-600 text-white" // ถ้ายังไม่ได้เลือก ให้เป็นสีน้ำเงิน
+            {/* เวลา */}
+            <div className="flex gap-2 mt-5 justify-center flex-wrap">
+              {type === "selectTime" &&
+                activity.time.map((slot) => (
+                  <button
+                    key={slot}
+                    disabled={bookingTime.includes(slot)}
+                    onClick={() => setTime(slot)}
+                    className={`px-4 py-2 rounded ${
+                      time === slot
+                        ? "bg-yellow-400 text-white"
+                        : bookingTime.includes(slot)
+                        ? "bg-gray-500 text-white"
+                        : "bg-green-600 text-white"
+                    }`}
+                  >
+                    {slot}
+                  </button>
+                ))}
+
+              {type === "AllDay" && (
+                <div
+                  className={`flex justify-center rounded p-4 text-2xl text-white ${
+                    indexRoom >= activity.maxPeople
+                      ? "bg-red-500"
+                      : "bg-gray-500"
                   }`}
                 >
-                  {data}
-                </button>
-              ))}
+                  {`จองแล้ว ${indexRoom} / ${activity.maxPeople}`}
+                </div>
+              )}
             </div>
 
             {/* ปุ่มจอง */}
@@ -198,23 +213,23 @@ const ActivityDetail = () => {
               </button>
             </div>
 
-            {/* Modal จองห้อง */}
+            {/* Modal */}
             {showModal && selectedRoom && selectedDate && (
               <BookingModal
                 date={selectedDate}
                 roomId={selectedRoom}
-                bookingTime={time}
+                bookingTime={type === "AllDay" ? "AllDay" : time}
                 maxPeople={activity.maxPeople}
                 roomName={roomName}
                 price={activity.price}
                 onClose={() => {
                   setShowModal(false);
-                  loadBookings(); // ✅ รีโหลดข้อมูลการจองเมื่อจองเสร็จ
+                  loadBookings();
                 }}
               />
             )}
 
-            {/* รายการจองที่มีอยู่ */}
+            {/* ตารางการจอง */}
             <h3 className="text-xl font-semibold mt-8">รายการจองที่มีอยู่</h3>
             <div className="overflow-x-auto mt-4">
               <table className="table w-full border-collapse border border-gray-300">
@@ -230,19 +245,21 @@ const ActivityDetail = () => {
                     bookings.map((booking) => (
                       <tr key={booking.id}>
                         <td className="border p-2">
-                          {rooms.find((room) => room.id === booking.roomId)
-                            ?.name || "ไม่ทราบ"}
+                          {rooms.find((r) => r.id === booking.roomId)?.name ||
+                            "ไม่ทราบ"}
                         </td>
                         <td className="border p-2">
                           {new Date(booking.bookingDate).toLocaleDateString()}
                         </td>
-                        <td className="border p-2">{booking.bookingTime} น.</td>
+                        <td className="border p-2">
+                          {booking.bookingTime || "ทั้งวัน"}
+                        </td>
                       </tr>
                     ))
                   ) : (
                     <tr>
                       <td
-                        colSpan="4"
+                        colSpan="3"
                         className="border p-2 text-center text-gray-500"
                       >
                         ไม่มีรายการจอง

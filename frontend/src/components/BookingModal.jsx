@@ -1,6 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import PropTypes from "prop-types";
-import { createBooking } from "../services/apiService";
+import {
+  createBooking,
+  getUserCodes,
+  createUserCode,
+  editUserCode,
+} from "../services/apiService";
 import Swal from "sweetalert2";
 
 const BookingModal = ({
@@ -14,8 +19,26 @@ const BookingModal = ({
 }) => {
   const [file, setFile] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [peopleCode, setPeopleCode] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
-  const [numberOfPeople, setNumberOfPeople] = useState(1); // จำนวนคน
+  const [numberOfPeople, setNumberOfPeople] = useState(1);
+  const [userCodes, setUserCodes] = useState(null);
+  const [dataUserCode, setDataUserCode] = useState(null);
+
+  useEffect(() => {
+    const fetchUserCodes = async () => {
+      try {
+        const response = await getUserCodes(localStorage.getItem("userId"));
+        const fetchedCode = response?.data?.[0]?.code || "";
+        setDataUserCode(response.data || []);
+        setUserCodes(fetchedCode);
+        setPeopleCode(fetchedCode);
+      } catch (error) {
+        console.error("Error fetching user codes:", error);
+      }
+    };
+    fetchUserCodes();
+  }, []);
 
   const handleFileChange = (e) => {
     setFile(e.target.files[0]);
@@ -32,34 +55,51 @@ const BookingModal = ({
       return;
     }
 
+    if (!peopleCode) {
+      setErrorMessage("กรุณากรอกรหัสผู้จองก่อนทำการจอง");
+      return;
+    }
+
     setIsUploading(true);
     setErrorMessage("");
 
     try {
-      // แปลงวันที่ที่เลือกเป็น UTC โดยตั้งเวลาเป็น 00:00:00 เพื่อหลีกเลี่ยงการแปลงเขตเวลา
+      // สร้างหรืออัปเดตรหัสผู้ใช้
+      if (userCodes === null) {
+        await createUserCode(localStorage.getItem("userId"), {
+          code: peopleCode,
+        });
+      } else if (peopleCode !== userCodes) {
+        await editUserCode(dataUserCode[0]?.id, {
+          code: peopleCode,
+        });
+      }
+
+      // แปลงวันที่
       const localDate = new Date(date);
-      localDate.setHours(0, 0, 0, 0); // ตั้งเวลาเป็นเวลาเริ่มต้นของวัน
+      localDate.setHours(0, 0, 0, 0);
 
       const formData = new FormData();
       formData.append("userId", localStorage.getItem("userId"));
       formData.append("roomId", roomId);
-      formData.append("bookingDate", localDate.toISOString()); // ใช้วันที่ที่แปลงแล้ว
+      formData.append("bookingDate", localDate.toISOString());
       formData.append("status", "PENDING");
       formData.append("paymentSlip", file);
       formData.append("bookingTime", bookingTime);
-      formData.append("numberOfPeople", numberOfPeople); // เพิ่มจำนวนคน
-      formData.append("totalPrice", price * numberOfPeople); // คำนวณราคาทั้งหมด
+      formData.append("numberOfPeople", numberOfPeople);
+      formData.append("totalPrice", price * numberOfPeople);
+      formData.append("userCode", peopleCode);
 
       await createBooking(formData);
-      // แจ้งเตือนการจองสำเร็จ
+
       Swal.fire({
         title: "การจองสำเร็จ",
         icon: "success",
         showConfirmButton: false,
         timer: 1500,
       });
+
       onClose();
-      window.location.reload();
     } catch (error) {
       console.error("การจองล้มเหลว:", error);
       setErrorMessage("ไม่สามารถสร้างการจองได้ กรุณาลองใหม่อีกครั้ง");
@@ -68,7 +108,6 @@ const BookingModal = ({
     }
   };
 
-  // คำนวณราคาทั้งหมด
   const totalPrice = price * numberOfPeople;
 
   return (
@@ -92,18 +131,25 @@ const BookingModal = ({
           <strong>ราคารวม: {totalPrice} บาท</strong>
         </p>
 
-        {/* ฟอร์มเลือกจำนวนคน */}
+        <label className="block mt-4 font-semibold">People Code</label>
+        <input
+          type="text"
+          value={peopleCode}
+          onChange={(e) => setPeopleCode(e.target.value)}
+          className="input input-warning w-full mt-2"
+          required
+        />
+
         <label className="block mt-4 font-semibold">จำนวนคน:</label>
         <input
           type="number"
           min="1"
           max={maxPeople}
           value={numberOfPeople}
-          onChange={(e) => setNumberOfPeople(e.target.value)}
+          onChange={(e) => setNumberOfPeople(Number(e.target.value))}
           className="input input-bordered w-full mt-2"
         />
 
-        {/* อัปโหลดไฟล์ */}
         <label className="block mt-4 font-semibold">
           อัปโหลดสลิปการชำระเงิน:
         </label>
@@ -114,10 +160,8 @@ const BookingModal = ({
           required
         />
 
-        {/* แสดงข้อผิดพลาด */}
         {errorMessage && <p className="text-red-500 mt-2">{errorMessage}</p>}
 
-        {/* ปุ่มยืนยันการจอง */}
         <button
           className="btn btn-primary mt-4 w-full"
           onClick={handleBooking}
@@ -126,7 +170,6 @@ const BookingModal = ({
           {isUploading ? "กำลังอัปโหลด..." : "ยืนยันการจอง"}
         </button>
 
-        {/* ปุ่มยกเลิก */}
         <button className="btn btn-error mt-2 w-full" onClick={onClose}>
           ยกเลิก
         </button>
@@ -140,8 +183,8 @@ BookingModal.propTypes = {
   roomId: PropTypes.string.isRequired,
   onClose: PropTypes.func.isRequired,
   bookingTime: PropTypes.string.isRequired,
-  price: PropTypes.number.isRequired, // รับค่า price จาก props
-  maxPeople: PropTypes.number.isRequired, // รับค่า maxPeople จาก props
+  price: PropTypes.number.isRequired,
+  maxPeople: PropTypes.number.isRequired,
   roomName: PropTypes.string.isRequired,
 };
 

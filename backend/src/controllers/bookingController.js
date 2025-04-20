@@ -13,7 +13,9 @@ exports.createBooking = async (req, res) => {
       bookingTime,
       numberOfPeople,
       totalPrice,
+      userCode,
     } = req.body;
+
     let paymentSlip = null;
     console.log("req.body", req.body);
     // ตรวจสอบว่ามีไฟล์แนบหรือไม่
@@ -33,6 +35,7 @@ exports.createBooking = async (req, res) => {
         bookingTime,
         numberOfPeople: Number(numberOfPeople),
         totalPrice: Number(totalPrice),
+        userCode,
       },
     });
 
