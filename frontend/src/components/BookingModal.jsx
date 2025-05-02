@@ -55,25 +55,13 @@ const BookingModal = ({
       return;
     }
 
-    if (!peopleCode) {
-      setErrorMessage("กรุณากรอกรหัสผู้จองก่อนทำการจอง");
-      return;
-    }
-
+   
     setIsUploading(true);
     setErrorMessage("");
 
     try {
       // สร้างหรืออัปเดตรหัสผู้ใช้
-      if (userCodes === null) {
-        await createUserCode(localStorage.getItem("userId"), {
-          code: peopleCode,
-        });
-      } else if (peopleCode !== userCodes) {
-        await editUserCode(dataUserCode[0]?.id, {
-          code: peopleCode,
-        });
-      }
+     
 
       // แปลงวันที่
       const localDate = new Date(date);
@@ -88,7 +76,7 @@ const BookingModal = ({
       formData.append("bookingTime", bookingTime);
       formData.append("numberOfPeople", numberOfPeople);
       formData.append("totalPrice", price * numberOfPeople);
-      formData.append("userCode", peopleCode);
+      // formData.append("userCode", peopleCode);
 
       await createBooking(formData);
 
@@ -131,14 +119,14 @@ const BookingModal = ({
           <strong>ราคารวม: {totalPrice} บาท</strong>
         </p>
 
-        <label className="block mt-4 font-semibold">People Code</label>
+        {/* <label className="block mt-4 font-semibold">People Code</label>
         <input
           type="text"
           value={peopleCode}
           onChange={(e) => setPeopleCode(e.target.value)}
           className="input input-warning w-full mt-2"
           required
-        />
+        /> */}
 
         <label className="block mt-4 font-semibold">จำนวนคน:</label>
         <input

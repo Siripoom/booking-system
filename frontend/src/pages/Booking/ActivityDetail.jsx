@@ -24,6 +24,7 @@ const ActivityDetail = () => {
   const [roomName, setRoomName] = useState(null);
   const [type, setType] = useState(null);
   const [indexRoom, setIndexRoom] = useState(0);
+  const [numberOfPeople, setNumberOfPeople] = useState(0);
 
   useEffect(() => {
     loadActivity();
@@ -52,6 +53,7 @@ const ActivityDetail = () => {
 
   const loadBookings = async () => {
     const response = await getBookings();
+    setNumberOfPeople(response.data.numberOfPeople);
     const filtered = response.data.filter((booking) =>
       rooms.some((room) => room.id === booking.roomId)
     );
@@ -193,17 +195,17 @@ const ActivityDetail = () => {
                   </button>
                 ))}
 
-              {type === "AllDay" && (
-                <div
-                  className={`flex justify-center rounded p-4 text-2xl text-white ${
-                    indexRoom >= activity.maxPeople
-                      ? "bg-red-500"
-                      : "bg-gray-500"
-                  }`}
-                >
-                  {`จองแล้ว ${indexRoom} / ${activity.maxPeople}`}
-                </div>
-              )}
+              {/* {type === "AllDay" && (
+                // <div
+                //   className={`flex justify-center rounded p-4 text-2xl text-white ${
+                //     indexRoom >= activity.maxPeople
+                //       ? "bg-red-500"
+                //       : "bg-gray-500"
+                //   }`}
+                // >
+                //   {`จองแล้ว ${numberOfPeople} / ${activity.maxPeople}`}
+                // </div>
+              )} */}
             </div>
 
             {/* ปุ่มจอง */}

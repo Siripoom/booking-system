@@ -8,7 +8,8 @@ const prisma = new PrismaClient();
 // ✅ ลงทะเบียนผู้ใช้
 exports.register = async (req, res) => {
   try {
-    const { fullName, email, password, role } = req.body;
+    const { fullName, email, password, role, phoneNumber, citizenId } =
+      req.body;
 
     // เข้ารหัสรหัสผ่าน
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -20,6 +21,8 @@ exports.register = async (req, res) => {
         email,
         password: hashedPassword,
         role: role || "USER",
+        phoneNumber,
+        citizenId,
       },
     });
 

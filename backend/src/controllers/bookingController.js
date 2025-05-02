@@ -13,7 +13,6 @@ exports.createBooking = async (req, res) => {
       bookingTime,
       numberOfPeople,
       totalPrice,
-      userCode,
     } = req.body;
 
     let paymentSlip = null;
@@ -35,7 +34,6 @@ exports.createBooking = async (req, res) => {
         bookingTime,
         numberOfPeople: Number(numberOfPeople),
         totalPrice: Number(totalPrice),
-        userCode,
       },
     });
 

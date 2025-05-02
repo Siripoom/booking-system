@@ -9,6 +9,8 @@ const Register = () => {
     email: "",
     password: "",
     role: "USER",
+    phoneNumber: "",
+    citizenId: "",
   });
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -60,6 +62,14 @@ const Register = () => {
             type="text"
             name="fullName"
             placeholder="Full Name"
+            className="input input-bordered w-full mb-2"
+            onChange={handleChange}
+            required
+          />
+          <input
+            type="text"
+            name="citizenId"
+            placeholder="Citizen ID"
             className="input input-bordered w-full mb-2"
             onChange={handleChange}
             required

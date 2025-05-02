@@ -29,7 +29,7 @@ exports.getUserById = async (req, res) => {
 // 🔹 สร้างผู้ใช้ใหม่
 exports.createUser = async (req, res) => {
   try {
-    const { fullName, email, password, role } = req.body;
+    const { fullName, email, password, role,phoneNumber } = req.body;
 
     // ตรวจสอบว่ามีอีเมลนี้อยู่แล้วหรือไม่
     const existingUser = await prisma.user.findUnique({ where: { email } });
@@ -40,7 +40,7 @@ exports.createUser = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const newUser = await prisma.user.create({
-      data: { fullName, email, password: hashedPassword, role },
+      data: { fullName, email, password: hashedPassword, role,phoneNumber },
     });
 
     res.status(201).json(newUser);
