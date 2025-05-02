@@ -16,17 +16,11 @@ model User {
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
   phoneNumber String
+  citizenId   String
   bookings    Booking[]
-  userCodes   UserCode[]
+  
 }
 
-model UserCode {
-  id        Int      @id @default(autoincrement())
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId    String
-  code      String
-  createdAt DateTime @default(now())
-}
 
 model Place {
   id          Int      @id @default(autoincrement())
@@ -65,8 +59,9 @@ model Booking {
   userId      String
   room        Room          @relation(fields: [roomId], references: [id], onDelete: Cascade)
   roomId      Int
-  userCode    String
   bookingDate DateTime
+  numberOfPeople Int
+  totalPrice Int
   bookingTime String
   paymentSlip String
   status      BookingStatus @default(PENDING)

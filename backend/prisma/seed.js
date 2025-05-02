@@ -9,6 +9,7 @@ async function main() {
       password: await bcrypt.hash("123456", 10),
       phoneNumber: "1234567890",
       role: "ADMIN",
+      citizenId: "1234567890123",
     },
   });
   const User = await prisma.user.create({
@@ -18,6 +19,7 @@ async function main() {
       phoneNumber: "1234567890",
       password: await bcrypt.hash("1", 10),
       role: "USER",
+      citizenId: "1234567890123",
     },
   });
 
@@ -34,7 +36,7 @@ async function main() {
       name: "ว่ายน้ำ",
       maxPeople: 30,
       price: 50,
-      time: ['AllDay'],
+      time: ["AllDay"],
     },
   });
 
@@ -44,7 +46,7 @@ async function main() {
       name: "ฟิตเนส",
       maxPeople: 50,
       price: 50,
-      time: ['AllDay'],
+      time: ["AllDay"],
     },
   });
 
