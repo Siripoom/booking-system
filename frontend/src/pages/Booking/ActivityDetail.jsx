@@ -53,7 +53,6 @@ const ActivityDetail = () => {
 
   const loadBookings = async () => {
     const response = await getBookings();
-    setNumberOfPeople(response.data.numberOfPeople);
     const filtered = response.data.filter((booking) =>
       rooms.some((room) => room.id === booking.roomId)
     );
@@ -80,7 +79,11 @@ const ActivityDetail = () => {
     );
 
     if (type === "AllDay") {
-      setIndexRoom(filteredBookingTime.length);
+      // Calculate total number of people booked
+      const totalPeopleBooked = filteredBookingTime.reduce((sum, booking) => {
+        return sum + booking.numberOfPeople;
+      }, 0);
+      setNumberOfPeople(totalPeopleBooked);
     } else {
       setBookingTime(filteredBookingTime.map((b) => b.bookingTime));
     }
@@ -91,6 +94,7 @@ const ActivityDetail = () => {
     setRoomName(name);
     setTime(null);
     setSelectedDate(null);
+    setNumberOfPeople(0); // Reset number of people when room changes
 
     const response = await getBookings();
     const filtered = response.data.filter((b) => b.roomId === roomId);
@@ -112,7 +116,7 @@ const ActivityDetail = () => {
       return;
     }
 
-    if (type === "AllDay" && indexRoom >= activity.maxPeople) {
+    if (type === "AllDay" && numberOfPeople >= activity.maxPeople) {
       Swal.fire({
         title: "ไม่สามารถจองได้",
         text: "ห้องนี้เต็มแล้วในวันนี้",
@@ -195,17 +199,17 @@ const ActivityDetail = () => {
                   </button>
                 ))}
 
-              {/* {type === "AllDay" && (
-                // <div
-                //   className={`flex justify-center rounded p-4 text-2xl text-white ${
-                //     indexRoom >= activity.maxPeople
-                //       ? "bg-red-500"
-                //       : "bg-gray-500"
-                //   }`}
-                // >
-                //   {`จองแล้ว ${numberOfPeople} / ${activity.maxPeople}`}
-                // </div>
-              )} */}
+              {type === "AllDay" && selectedRoom && selectedDate && (
+                <div
+                  className={`flex justify-center rounded p-4 text-2xl text-white ${
+                    numberOfPeople >= activity.maxPeople
+                      ? "bg-red-500"
+                      : "bg-gray-500"
+                  }`}
+                >
+                  {`จองแล้ว ${numberOfPeople} / ${activity.maxPeople}`}
+                </div>
+              )}
             </div>
 
             {/* ปุ่มจอง */}

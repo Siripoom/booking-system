@@ -127,6 +127,7 @@ const ManageUsers = () => {
         <thead>
           <tr>
             <th>Name</th>
+            <th>ID</th>
             <th>Email</th>
             <th>Phone</th>
             <th>Role</th>
@@ -138,6 +139,7 @@ const ManageUsers = () => {
             filteredUsers.map((user) => (
               <tr key={user.id}>
                 <td>{user.fullName}</td>
+                <td>{user.userCode}</td>
                 <td>{user.email}</td>
                 <td>{user.phoneNumber}</td>
                 <td>{user.role}</td>
