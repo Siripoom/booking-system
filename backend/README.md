@@ -5,7 +5,6 @@
 Before setting up the backend, ensure you have the following installed:
 
 - **Node.js** (v16 or later)
-- **Docker** & **Docker Compose**
 - **PostgreSQL** (if running without Docker)
 
 ---
@@ -47,27 +46,14 @@ yarn install or npm install
 
 ---
 
-## 🐳 4. Set Up Docker & PostgreSQL
+##  4. Set Up  PostgreSQL
 
-### **If you are using Docker to manage PostgreSQL**
-
-1. Start the PostgreSQL container:
-
-```sh
-docker-compose up -d
 ```
-
-2. Verify the container is running:
-
-```sh
-docker ps
-```
-
-3. Connect to PostgreSQL inside the container:
-
-```sh
-docker exec -it postgres_db psql -U postgres -d booking-system
-```
+1.psql -U postgres
+2.CREATE DATABASE booking_system;
+3.\q
+4.node scripts/createTables.js
+5.node scripts/seedWithPool.js
 
 ### **If running PostgreSQL locally**
 
@@ -81,23 +67,8 @@ DATABASE_URL=
 
 ---
 
-## 📦 5. Database Setup with Prisma
 
-```sh
-npx prisma migrate dev --name init
-```
-
-This command initializes the database schema and applies migrations.
-
-To generate the Prisma Client:
-
-```sh
-npx prisma generate
-```
-
----
-
-## 🚀 6. Start the Backend Server
+## 🚀 5. Start the Backend Server
 
 ```sh
 npm run dev
@@ -107,7 +78,7 @@ This will start the backend on **http://localhost:5000**.
 
 ---
 
-## 🔥 7. API Endpoints Testing
+## 🔥 6. API Endpoints Testing
 
 Use Postman or Curl to test API routes.
 Example:
@@ -120,31 +91,11 @@ curl http://localhost:5000/api/health
 
 ## 🛑 Stopping Services
 
-To stop PostgreSQL running inside Docker:
-
-```sh
-docker-compose down
-```
-
 To stop the backend server:
 
 ```sh
 CTRL + C (in terminal)
 ```
 
----
-
-## 🎯 Troubleshooting
-
-- **Issue:** `FATAL: database files are incompatible with server`
-  - **Solution:** Remove existing database volume and restart PostgreSQL:
-  ```sh
-  docker-compose down -v
-  docker-compose up -d
-  ```
-- **Issue:** Cannot connect to PostgreSQL
-  - **Solution:** Verify `DATABASE_URL` in `.env` and restart PostgreSQL.
-
----
 
 ✅ **Now your backend and database are fully set up and ready to use!** 🚀
